@@ -2,6 +2,9 @@ package com.jzo2o.customer.mapper;
 
 import com.jzo2o.customer.model.domain.AddressBook;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jzo2o.customer.model.dto.response.AddressResDto;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface AddressBookMapper extends BaseMapper<AddressBook> {
 
+    List<AddressResDto> queryAddressListByUserId(Long userId);
 }

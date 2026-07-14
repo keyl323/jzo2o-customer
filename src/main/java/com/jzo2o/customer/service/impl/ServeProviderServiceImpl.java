@@ -3,6 +3,8 @@ package com.jzo2o.customer.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,6 +17,7 @@ import com.jzo2o.common.constants.UserType;
 import com.jzo2o.common.enums.EnableStatusEnum;
 import com.jzo2o.common.enums.SmsBussinessTypeEnum;
 import com.jzo2o.common.expcetions.BadRequestException;
+import com.jzo2o.common.expcetions.CommonException;
 import com.jzo2o.common.model.PageResult;
 import com.jzo2o.common.utils.BeanUtils;
 import com.jzo2o.common.utils.CollUtils;
@@ -59,21 +62,20 @@ public class ServeProviderServiceImpl extends ServiceImpl<ServeProviderMapper, S
 
     @Resource
     private PasswordEncoder passwordEncoder;
-
     @Resource
     private IServeProviderSettingsService serveProviderSettingsService;
-
     @Resource
     private IServeProviderSyncService serveProviderSyncService;
     @Resource
     private IAgencyCertificationService agencyCertificationService;
     @Resource
     private IWorkerCertificationService workerCertificationService;
-
     @Resource
     private IServeProviderService owner;
     @Resource
     private SmsCodeApi smsCodeApi;
+
+
 
     @Override
     public PageResult<ServeProviderListResDTO> pageQueryWorker(ServeProviderPageQueryReqDTO serveProviderPageQueryReqDTO) {
@@ -204,6 +206,77 @@ public class ServeProviderServiceImpl extends ServiceImpl<ServeProviderMapper, S
             AgencyCertification agencyCertification = agencyCertificationService.getById(providerId);
             return BeanUtil.toBean(agencyCertification,CertificationStatusDTO.class);
         }
+    }
+
+    /**
+     * 机构登录密码重置
+     * @param institutionResetPasswordReqDTO
+     */
+    @Override
+    public void resetPassword(InstitutionResetPasswordReqDTO institutionResetPasswordReqDTO) {
+        // 数据校验
+        if(StringUtils.isEmpty(institutionResetPasswordReqDTO.getVerifyCode())){
+            throw new BadRequestException("验证码错误，请重新获取");
+        }
+        //远程调用publics服务校验验证码是否正确
+        boolean verifyResult = smsCodeApi.verify(institutionResetPasswordReqDTO.getPhone(),
+                SmsBussinessTypeEnum.INSTITUTION_RESET_PASSWORD, institutionResetPasswordReqDTO.getVerifyCode()).getIsSuccess();
+        if(!verifyResult) {
+            throw new BadRequestException("验证码错误，请重新获取");
+        }
+
+        //检验手机是否存在数据库 如果数据库中没有该手机号则报错
+        String phone = institutionResetPasswordReqDTO.getPhone();
+        LambdaQueryWrapper<ServeProvider> queryWrapper = Wrappers.<ServeProvider>lambdaQuery()
+                .eq(ServeProvider::getPhone, phone);
+        ServeProvider serveProvider = baseMapper.selectOne(queryWrapper);
+        if (ObjectUtil.isEmpty(serveProvider)){
+            throw new BadRequestException("该手机号未注册，请先注册");
+        }
+
+        String newPassword = passwordEncoder.encode(institutionResetPasswordReqDTO.getPassword());
+        // 更新密码
+        boolean update = lambdaUpdate().eq(ServeProvider::getPhone, phone)
+                .set(ServeProvider::getPassword, newPassword).update();
+
+        if (!update){
+            throw new CommonException("密码重置失败，请稍后再试");
+        }
+    }
+
+    /**
+     * 机构注册功能开发
+     * @param institutionRegisterReqDTO
+     */
+    @Override
+    public void register(InstitutionRegisterReqDTO institutionRegisterReqDTO) {
+        //远程调用publics服务校验验证码是否正确
+        boolean verifyResult = smsCodeApi.verify(institutionRegisterReqDTO.getPhone(),
+                SmsBussinessTypeEnum.INSTITION_REGISTER, institutionRegisterReqDTO.getVerifyCode()).getIsSuccess();
+        if(!verifyResult) {
+            throw new BadRequestException("验证码错误，请重新获取");
+        }
+        //检验手机号是否存在数据库 如果数据库中有该手机号则报错
+        ServeProvider existServeProvider = lambdaQuery()
+                .eq(ServeProvider::getPhone, institutionRegisterReqDTO.getPhone())
+                .one();
+        if (existServeProvider != null) {
+            if (existServeProvider.getType().equals(UserType.WORKER)) {
+                throw new BadRequestException("该账号已被服务人员注册");
+            } else {
+                throw new BadRequestException("该账号已被机构注册");
+            }
+        }
+        ServeProvider serveProvider = new ServeProvider();
+        serveProvider.setPhone(institutionRegisterReqDTO.getPhone());
+        serveProvider.setType(UserType.INSTITUTION);
+        serveProvider.setStatus(CommonStatusConstants.USER_STATUS_NORMAL);
+        serveProvider.setCode(IdUtils.getSnowflakeNextIdStr());
+        serveProvider.setPassword(passwordEncoder.encode(institutionRegisterReqDTO.getPassword()));
+        baseMapper.insert(serveProvider);
+
+        serveProviderSettingsService.add(serveProvider.getId(),serveProvider.getType());
+
     }
 
     /**
