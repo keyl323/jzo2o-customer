@@ -1,6 +1,10 @@
 package com.jzo2o.customer.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.jzo2o.common.utils.BeanUtils;
 import com.jzo2o.customer.model.domain.BankAccount;
 import com.jzo2o.customer.mapper.BankAccountMapper;
@@ -27,32 +31,18 @@ public class BankAccountServiceImpl extends ServiceImpl<BankAccountMapper, BankA
      * 新增或更新银行账户
      * @param bankAccountUpsertReqDTO
      */
-    @Override
-    public BankAccount addOrUpdate(BankAccountUpsertReqDTO bankAccountUpsertReqDTO,Integer type) {
-        BankAccount bankAccount = BeanUtil.toBean(bankAccountUpsertReqDTO, BankAccount.class);
-        bankAccount.setUserId(UserContext.currentUserId());
-        bankAccount.setUserType(type);
-        saveOrUpdate(bankAccount);
-
-        return bankAccount;
-
-    }
-
     /**
-     * 获取当前用户银行账号
-     * @return
+     * 新增或更新
+     *
+     * @param bankAccountUpsertReqDTO 银行账号新增或更新模型
      */
     @Override
-    public BankAccountResDTO getUserAccount(Integer type) {
-        Long userId = UserContext.currentUserId();
-        BankAccount bankAccount = lambdaQuery().eq(BankAccount::getUserId, userId)
-                .eq(BankAccount::getIsDeleted, 0)
-                .one();
-        BankAccountResDTO bankAccountResDTO = BeanUtils.toBean(bankAccount, BankAccountResDTO.class);
-        bankAccountResDTO.setId(userId);
-        bankAccountResDTO.setType(type);
-        return bankAccountResDTO;
+    public void upsert(BankAccountUpsertReqDTO bankAccountUpsertReqDTO) {
+        BankAccount bankAccount = BeanUtil.toBean(bankAccountUpsertReqDTO, BankAccount.class);
+        super.saveOrUpdate(bankAccount);
     }
+
+
 
 
 }

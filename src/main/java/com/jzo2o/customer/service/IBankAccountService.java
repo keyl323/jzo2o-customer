@@ -19,12 +19,8 @@ public interface IBankAccountService extends IService<BankAccount> {
      * 新增或更新银行账户
      * @param bankAccountUpsertReqDTO
      */
-    BankAccount addOrUpdate(BankAccountUpsertReqDTO bankAccountUpsertReqDTO ,Integer type);
+    void upsert(BankAccountUpsertReqDTO bankAccountUpsertReqDTO);
 
-    /**
-     * 获取当前用户银行账号
-     * @return
-     */
-    BankAccountResDTO getUserAccount(Integer type);
+
 
 }
