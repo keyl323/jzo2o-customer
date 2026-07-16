@@ -21,6 +21,6 @@ public class InstitutionRegisterReqDTO {
     @Size(max = 16, min = 8, message = "密码输入格式错误，请重新输入")
     private String password;
     @ApiModelProperty(value = "短信验证码",required = true)
-    @NotNull(message = "验证码不能为空，请重新输入")
+    @NotNull(message = "验证码错误，请重新输入")
     private String verifyCode;
 }

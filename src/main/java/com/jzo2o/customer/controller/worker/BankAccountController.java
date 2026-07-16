@@ -1,6 +1,5 @@
 package com.jzo2o.customer.controller.worker;
 
-
 import cn.hutool.core.bean.BeanUtil;
 import com.jzo2o.common.model.CurrentUserInfo;
 import com.jzo2o.customer.model.domain.BankAccount;
@@ -13,19 +12,13 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.prefs.BackingStoreException;
 
 /**
- * <p>
- * 个人银行账户 前端控制器
- * </p>
- *
- * @author yutsung
- * @since 2026-07-14
+ * @author itcast
  */
 @RestController("workerBankAccountController")
 @RequestMapping("/worker/bank-account")
-@Api(tags = "服务端 - 银行账户相关接口")
+@Api(tags = "服务端 - 银行账户信息相关接口")
 public class BankAccountController {
 
     @Resource
@@ -46,5 +39,4 @@ public class BankAccountController {
         BankAccount bankAccount = bankAccountService.getById(UserContext.currentUserId());
         return BeanUtil.toBean(bankAccount, BankAccountResDTO.class);
     }
-
 }

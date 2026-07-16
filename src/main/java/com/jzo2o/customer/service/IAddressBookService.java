@@ -6,7 +6,6 @@ import com.jzo2o.customer.model.domain.AddressBook;
 import com.jzo2o.customer.model.dto.request.AddressBookPageQueryReqDTO;
 import com.jzo2o.customer.model.dto.request.AddressBookUpsertReqDTO;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.jzo2o.customer.model.dto.response.AddressResDto;
 
 import java.util.List;
 
@@ -19,6 +18,44 @@ import java.util.List;
  * @since 2023-07-06
  */
 public interface IAddressBookService extends IService<AddressBook> {
+    /**
+     * 地址薄新增
+     *
+     * @param addressBookUpsertReqDTO 插入更新地址薄
+     */
+    void add(AddressBookUpsertReqDTO addressBookUpsertReqDTO);
+
+    /**
+     * 地址薄修改
+     *
+     * @param id                      地址薄id
+     * @param addressBookUpsertReqDTO 插入更新地址薄
+     */
+    void update(Long id, AddressBookUpsertReqDTO addressBookUpsertReqDTO);
+
+    /**
+     * 地址薄设为默认/取消默认
+     *
+     * @param userId   用户id
+     * @param id   地址薄id
+     * @param flag 是否为默认地址，0：否，1：是
+     */
+    void updateDefaultStatus(Long userId,Long id, Integer flag);
+
+    /**
+     * 分页查询
+     *
+     * @param addressBookPageQueryReqDTO 查询条件
+     * @return 分页结果
+     */
+    PageResult<AddressBookResDTO> page(AddressBookPageQueryReqDTO addressBookPageQueryReqDTO);
+
+    /**
+     * 获取默认地址
+     *
+     * @return 默认地址
+     */
+    AddressBookResDTO defaultAddress();
 
     /**
      * 根据用户id和城市编码获取地址
@@ -28,44 +65,4 @@ public interface IAddressBookService extends IService<AddressBook> {
      * @return 地址编码
      */
     List<AddressBookResDTO> getByUserIdAndCity(Long userId, String cityCode);
-
-    /**
-     * 新增地址簿
-     * @param addressBookUpsertReqDTO
-     */
-    void addAddress(AddressBookUpsertReqDTO addressBookUpsertReqDTO);
-
-    /**
-     * 获取地址簿详情
-     * @param id
-     */
-    AddressBook getAddress(Long id);
-
-    /**
-     * 修改地址簿
-     * @param id
-     */
-    AddressBook updateAddress(Long id,AddressBookUpsertReqDTO addressBookUpsertReqDTO);
-
-
-
-    /**
-     * 设置/取消默认地址
-     * @param flag
-     * @param id
-     */
-    void setDefaultAddress(Integer flag, Long id);
-
-    /**
-     * 获取默认地址
-     * @return
-     */
-    AddressBook getDefaultAddress();
-
-    /**
-     * 地址簿分页查询
-     * @param addressBookPageQueryReqDTO
-     * @return
-     */
-    PageResult<AddressResDto> selectPage(AddressBookPageQueryReqDTO addressBookPageQueryReqDTO);
 }

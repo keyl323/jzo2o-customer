@@ -1,6 +1,5 @@
 package com.jzo2o.customer.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -9,9 +8,7 @@ import com.jzo2o.customer.enums.CertificationStatusEnum;
 import com.jzo2o.customer.mapper.AgencyCertificationMapper;
 import com.jzo2o.customer.model.domain.AgencyCertification;
 import com.jzo2o.customer.model.dto.AgencyCertificationUpdateDTO;
-import com.jzo2o.customer.model.dto.request.AgencyCertificationAuditAddReqDTO;
 import com.jzo2o.customer.service.IAgencyCertificationService;
-import com.jzo2o.mvc.utils.UserContext;
 import org.springframework.stereotype.Service;
 
 /**
@@ -44,24 +41,6 @@ public class AgencyCertificationServiceImpl extends ServiceImpl<AgencyCertificat
                 .set(ObjectUtil.isNotEmpty(agencyCertificationUpdateDTO.getBusinessLicense()), AgencyCertification::getBusinessLicense, agencyCertificationUpdateDTO.getBusinessLicense())
                 .set(ObjectUtil.isNotEmpty(agencyCertificationUpdateDTO.getCertificationTime()), AgencyCertification::getCertificationTime, agencyCertificationUpdateDTO.getCertificationTime());
         super.update(updateWrapper);
-    }
-
-    /**
-     * 机构端提交申请认证
-     * @param agencyCertificationAuditAddReqDTO
-     */
-    @Override
-    public void submitAuth(AgencyCertificationAuditAddReqDTO agencyCertificationAuditAddReqDTO) {
-        //1.获取服务人员id
-        Long workerId = UserContext.currentUserId();
-        //2.dto转换为实体
-        AgencyCertification agencyCertification = BeanUtil.toBean(agencyCertificationAuditAddReqDTO, AgencyCertification.class);
-        agencyCertification.setId(workerId);
-        //2.1.设置认证状态为认证中
-        agencyCertification.setCertificationStatus(1);
-        //3.保存
-        save(agencyCertification);
-
     }
 
 

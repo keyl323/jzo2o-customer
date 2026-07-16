@@ -15,6 +15,8 @@ import javax.annotation.Resource;
  * 服务人员/机构表 前端控制器
  * </p>
  *
+ * @author itcast
+ * @since 2023-07-17
  */
 @RestController("agencyServeProviderController")
 @RequestMapping("/agency/serve-provider")
@@ -23,17 +25,15 @@ public class ServeProviderController {
     @Resource
     private IServeProviderService serveProviderService;
 
-
+    @PostMapping("/institution/resetPassword")
+    @ApiOperation("机构登录密码重置接口")
+    public void resetPassword(@RequestBody InstitutionResetPasswordReqDTO institutionResetPasswordReqDTO) {
+        serveProviderService.resetPassword(institutionResetPasswordReqDTO);
+    }
 
     @GetMapping("/currentUserInfo")
     @ApiOperation("获取当前用户信息")
     public ServeProviderInfoResDTO currentUserInfo() {
         return serveProviderService.currentUserInfo();
-    }
-
-    @PostMapping("/institution/resetPassword")
-    @ApiOperation("机构登录密码重置")
-    public void resetPassword(@RequestBody InstitutionResetPasswordReqDTO institutionResetPasswordReqDTO) {
-        serveProviderService.resetPassword(institutionResetPasswordReqDTO);
     }
 }

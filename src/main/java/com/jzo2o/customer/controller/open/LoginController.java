@@ -7,7 +7,6 @@ import com.jzo2o.customer.model.dto.response.LoginResDTO;
 import com.jzo2o.customer.service.ILoginService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,7 +42,7 @@ public class LoginController {
      */
     @PostMapping("/common/user")
     @ApiOperation("c端用户登录接口")
-    public LoginResDTO loginForCommonUser(@RequestBody  LoginForCustomerReqDTO loginForCustomerReqDTO) {
+    public LoginResDTO loginForCommonUser(@RequestBody LoginForCustomerReqDTO loginForCustomerReqDTO) {
         return loginService.loginForCommonUser(loginForCustomerReqDTO);
     }
 
